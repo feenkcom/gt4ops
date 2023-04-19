@@ -10,6 +10,6 @@ BaselineOfGt4ops >> baseline: spec [
 	spec
 		for: #common
 		do: [ spec
-				baseline: 'SmaCC_YAML' with: [ spec repository: 'github://j-brant/SmaCC' ];
-				package: 'Gt4GitLab' with: [ spec requires: 'SmaCC_YAML' ] ]
+				baseline: 'YAMLParser' with: [ spec repository: 'github://j-brant/SmaCC' ];
+				package: 'Gt4GitLab' with: [ spec requires: 'YAMLParser' ] ]
 ]
