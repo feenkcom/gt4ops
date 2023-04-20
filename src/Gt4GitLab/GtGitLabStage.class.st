@@ -6,7 +6,8 @@ Class {
 		'previousStage',
 		'nextStage',
 		'name',
-		'ast'
+		'ast',
+		'pipeline'
 	],
 	#category : #'Gt4GitLab-Model'
 }
@@ -77,6 +78,16 @@ GtGitLabStage >> nextStage [
 { #category : #accessing }
 GtGitLabStage >> nextStage: aStage [
 	nextStage := aStage
+]
+
+{ #category : #accessing }
+GtGitLabStage >> pipeline [
+	^ pipeline
+]
+
+{ #category : #accessing }
+GtGitLabStage >> pipeline: aPipeline [
+	pipeline := aPipeline
 ]
 
 { #category : #accessing }
