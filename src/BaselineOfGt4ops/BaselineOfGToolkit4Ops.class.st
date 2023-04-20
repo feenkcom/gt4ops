@@ -1,11 +1,11 @@
 Class {
-	#name : #BaselineOfGt4ops,
+	#name : #BaselineOfGToolkit4Ops,
 	#superclass : #BaselineOf,
 	#category : #BaselineOfGt4ops
 }
 
 { #category : #baselines }
-BaselineOfGt4ops >> baseline: spec [
+BaselineOfGToolkit4Ops >> baseline: spec [
 	<baseline>
 	spec
 		for: #common
