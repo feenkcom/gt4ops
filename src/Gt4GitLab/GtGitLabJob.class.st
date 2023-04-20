@@ -5,10 +5,16 @@ Class {
 		'scripts',
 		'stage',
 		'name',
-		'ast'
+		'ast',
+		'dependencies'
 	],
 	#category : #'Gt4GitLab-Model'
 }
+
+{ #category : #accessing }
+GtGitLabJob >> addDependency: aJob [
+	dependencies add: aJob
+]
 
 { #category : #accessing }
 GtGitLabJob >> addScript: aString [
@@ -26,14 +32,25 @@ GtGitLabJob >> ast: aNode [
 ]
 
 { #category : #accessing }
+GtGitLabJob >> dependencies [
+	^ dependencies
+]
+
+{ #category : #accessing }
+GtGitLabJob >> dependencies: anObject [
+	dependencies := anObject
+]
+
+{ #category : #accessing }
 GtGitLabJob >> gtAstViewFor: aView [
 	<gtView>
 	ast ifNil: [ ^ aView empty ].
-	^ aView forward
+	^ aView explicit
 		title: 'Source';
 		priority: 10;
-		object: [ ast ];
-		view: #gtSourceFor:
+		stencil: [ | pipeline |
+			pipeline := self pipeline.
+			pipeline astView: self ]
 ]
 
 { #category : #accessing }
@@ -52,7 +69,8 @@ GtGitLabJob >> gtScriptsFor: aView [
 { #category : #initialization }
 GtGitLabJob >> initialize [
 	super initialize.
-	scripts := OrderedCollection new
+	scripts := OrderedCollection new.
+	dependencies := OrderedCollection new
 ]
 
 { #category : #accessing }
@@ -63,6 +81,11 @@ GtGitLabJob >> name [
 { #category : #accessing }
 GtGitLabJob >> name: aString [
 	name := aString
+]
+
+{ #category : #accessing }
+GtGitLabJob >> pipeline [
+	^ stage ifNotNil: [ stage pipeline ]
 ]
 
 { #category : #accessing }

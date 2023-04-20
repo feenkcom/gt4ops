@@ -20,6 +20,49 @@ GtGitLabPipeline >> addStage: aStage [
 ]
 
 { #category : #accessing }
+GtGitLabPipeline >> ast [
+	^ files notEmpty ifTrue: [ files first ] ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
+GtGitLabPipeline >> astView: anObject [
+	| nodeMap styler |
+	nodeMap := Dictionary new.
+	self stages
+		do: [ :each | each ast ifNotNil: [ :node | nodeMap at: node put: each ] ].
+	self jobs
+		do: [ :each | each ast ifNotNil: [ :node | nodeMap at: node put: each ] ].
+	styler := (GtSmaCCParserStyler forParser: YAMLParser)
+			stylerRules: {GtSmaCCNodeStylerRule
+						nodeClassName: #YAMLParseNode
+						styleBlock: [ :styleable :node :text | 
+							nodeMap
+								at: node
+								ifPresent: [ :obj | 
+									| position |
+									position := ((node isKindOf: YAMLMappingNode)
+											ifTrue: [ node key ]
+											ifFalse: [ node ]) stopPosition.
+									text
+										attribute: (BrTextAdornmentDynamicAttribute new
+												beAppend;
+												beNotOverwritableByStyler;
+												stencil: [ BrButton new
+														background: BrGlamorousColors defaultButtonBorderColor;
+														size: 8 @ 8;
+														geometry: BlEllipseGeometry new;
+														margin: (BlInsets left: 2 right: 2);
+														action: [ :button | button phlow spawnObject: obj ] ])
+										from: position
+										to: position ] ]}.
+	^ anObject ast
+		gtSourceEditorWithHighlight: BrGlamorousColors neutralBackgroundColor
+		styler: (GtCompositeSmaCCASTStyler new
+				stylers: {YAMLParser gtStyler.
+						styler})
+]
+
+{ #category : #accessing }
 GtGitLabPipeline >> files [
 	^ files
 ]
@@ -30,10 +73,21 @@ GtGitLabPipeline >> files: anObject [
 ]
 
 { #category : #accessing }
+GtGitLabPipeline >> gtAstViewFor: aView [
+	<gtView>
+	self ast ifNil: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Source';
+		priority: 10;
+		stencil: [ self astView: self ]
+]
+
+{ #category : #accessing }
 GtGitLabPipeline >> gtGraphViewFor: aView [
 	<gtView>
 	^ aView mondrian
 		title: 'Pipeline';
+		priority: 10;
 		painting: [ :mondrian | 
 			mondrian nodes
 				shape: [ :stage | 

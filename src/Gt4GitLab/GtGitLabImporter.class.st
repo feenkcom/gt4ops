@@ -89,6 +89,8 @@ GtGitLabImporter >> loadJobsFrom: files [
 							stageName := value at: 'stage'.
 							job stage: (self stageNamed: stageName).
 							job scripts addAll: (value at: 'script' ifAbsent: [ #() ]).
+							(value at: 'dependencies' ifAbsent: [ #() ])
+								do: [ :each | job addDependency: (self jobNamed: each) ].
 							pipeline addJob: job ] ] ]
 ]
 
@@ -117,5 +119,6 @@ GtGitLabImporter >> stageNamed: aString [
 		at: aString
 		ifAbsentPut: [ GtGitLabStage new
 				name: aString;
+				pipeline: pipeline;
 				yourself ]
 ]
