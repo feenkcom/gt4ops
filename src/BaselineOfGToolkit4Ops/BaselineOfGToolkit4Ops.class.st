@@ -1,7 +1,7 @@
 Class {
 	#name : #BaselineOfGToolkit4Ops,
 	#superclass : #BaselineOf,
-	#category : #BaselineOfGt4ops
+	#category : #BaselineOfGToolkit4Ops
 }
 
 { #category : #baselines }
