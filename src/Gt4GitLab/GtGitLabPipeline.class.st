@@ -58,7 +58,7 @@ GtGitLabPipeline >> astView: anObject [
 	^ anObject ast
 		gtSourceEditorWithHighlight: BrGlamorousColors neutralBackgroundColor
 		styler: (GtCompositeSmaCCASTStyler new
-				stylers: {YAMLParser gtStyler.
+				stylers: {GtSmaCCParserStyler yamlStylerWithAliasExpander: YAMLParser.
 						styler})
 ]
 
