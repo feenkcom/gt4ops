@@ -10,6 +10,7 @@ Class {
 
 { #category : #importing }
 GtGitHubImporter >> addJobDataFrom: aDictionary to: job [
+	aDictionary isDictionary ifFalse: [ ^ self ].
 	job ast: ((ast nodeForObject: aDictionary) ifNotNil: [ :node | node parent ]).
 	aDictionary
 		at: 'needs'
@@ -20,13 +21,16 @@ GtGitHubImporter >> addJobDataFrom: aDictionary to: job [
 						ifTrue: [ value do: [ :each | job addDependency: (self jobNamed: each) ] ] ] ].
 	aDictionary
 		at: 'steps'
-		ifPresent: [ :steps | steps do: [ :each | job addStep: (self createStepFrom: each) ] ]
+		ifPresent: [ :steps | 
+			(steps isString not and: [ steps isCollection ])
+				ifTrue: [ steps do: [ :each | job addStep: (self createStepFrom: each) ] ] ]
 ]
 
 { #category : #importing }
 GtGitHubImporter >> createStepFrom: aDictionary [
 	| step |
 	step := GtGitHubJobStep new.
+	aDictionary isDictionary ifFalse: [ ^ step ].
 	step ast: (ast nodeForObject: aDictionary).
 	step name: (aDictionary at: 'name' ifAbsent: [  ]).
 	step script: (aDictionary at: 'run' ifAbsent: [  ]).
@@ -35,8 +39,26 @@ GtGitHubImporter >> createStepFrom: aDictionary [
 ]
 
 { #category : #importing }
+GtGitHubImporter >> createWorkflow [
+	| obj workflow |
+	workflow := GtGitHubWorkflow new.
+	ast isErrorNode ifTrue: [ ^ workflow ].
+	obj := ast object.
+	workflow ast: ast.
+	jobs := Dictionary new.
+	self importJobsFrom: obj into: workflow.
+	self importTriggersFrom: obj into: workflow.
+	jobs := nil.
+	^ workflow
+]
+
+{ #category : #importing }
 GtGitHubImporter >> importJobsFrom: aDictionary into: workflow [
-	(aDictionary at: 'jobs' ifAbsent: [ #() ])
+	aDictionary isDictionary ifFalse: [ ^ self ].
+	((aDictionary
+		at: 'jobs'
+		ifPresent: [ :dict | dict isDictionary ifTrue: [ dict ] ]
+		ifAbsent: [  ]) ifNil: [ #() ])
 		keysAndValuesDo: [ :key :value | 
 			| job |
 			job := self jobNamed: key.
@@ -46,10 +68,15 @@ GtGitHubImporter >> importJobsFrom: aDictionary into: workflow [
 
 { #category : #importing }
 GtGitHubImporter >> importTriggersFrom: aDictionary into: workflow [
+	aDictionary isDictionary ifFalse: [ ^ self ].
 	aDictionary
 		at: 'on'
 		ifPresent: [ :dict | 
-			(dict isDictionary ifTrue: [ dict keys ] ifFalse: [ dict ])
+			(dict isDictionary
+				ifTrue: [ dict keys ]
+				ifFalse: [ (dict isString not and: [ dict isCollection ])
+						ifTrue: [ dict ]
+						ifFalse: [ #() ] ])
 				do: [ :each | 
 					| event |
 					event := GtGitHubEvent new.
@@ -64,19 +91,27 @@ GtGitHubImporter >> importTriggersFrom: aDictionary into: workflow [
 ]
 
 { #category : #importing }
-GtGitHubImporter >> importWorkflow: aFileReference [
-	| workflow obj |
-	jobs := Dictionary new.
-	ast := YAMLParser parseFile: aFileReference.
-	obj := ast object.
-	workflow := GtGitHubWorkflow new.
+GtGitHubImporter >> importWorkflowAST: anAST [
+	ast := anAST.
+	^ self createWorkflow
+]
+
+{ #category : #importing }
+GtGitHubImporter >> importWorkflowFile: aFileReference [
+	| workflow |
+	ast := YAMLParser parseFileWithErrors: aFileReference.
+	workflow := self createWorkflow.
 	workflow
-		name: (obj at: 'name' ifAbsent: [ aFileReference basenameWithoutExtension ]).
-	workflow ast: ast.
-	self importJobsFrom: obj into: workflow.
-	self importTriggersFrom: obj into: workflow.
-	jobs := nil.
+		name: ((ast object isDictionary ifTrue: [ ast object ] ifFalse: [ Dictionary new ])
+				at: 'name'
+				ifAbsent: [ aFileReference basenameWithoutExtension ]).
 	^ workflow
+]
+
+{ #category : #importing }
+GtGitHubImporter >> importWorkflowString: aString [
+	ast := YAMLParser parseWithErrors: aString.
+	^ self createWorkflow
 ]
 
 { #category : #importing }
@@ -85,15 +120,15 @@ GtGitHubImporter >> importWorkflows: aFileReference [
 	workflows := GtGitHubWorkflows new.
 	workflows directory: aFileReference asFileReference.
 	(workflows directory filesMatching: '*.yml;*.yaml')
-		do: [ :each | workflows add: (self importWorkflow: each) ].
+		do: [ :each | workflows add: (self importWorkflowFile: each) ].
 	^ workflows
 ]
 
 { #category : #importing }
 GtGitHubImporter >> jobNamed: aString [
 	^ jobs
-		at: aString
+		at: aString asString
 		ifAbsentPut: [ GtGitHubJob new
-				name: aString;
+				name: aString asString;
 				yourself ]
 ]

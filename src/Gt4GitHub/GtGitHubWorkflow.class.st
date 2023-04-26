@@ -145,8 +145,19 @@ GtGitHubWorkflow >> gtTriggersView: aView [
 { #category : #initialization }
 GtGitHubWorkflow >> initialize [
 	super initialize.
+	name := ''.
 	jobs := OrderedCollection new.
 	triggers := OrderedCollection new
+]
+
+{ #category : #accessing }
+GtGitHubWorkflow >> jobs [
+	^ jobs
+]
+
+{ #category : #accessing }
+GtGitHubWorkflow >> jobs: anObject [
+	jobs := anObject
 ]
 
 { #category : #accessing }
