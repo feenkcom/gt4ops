@@ -48,9 +48,7 @@ GtGitLabJob >> gtAstViewFor: aView [
 	^ aView explicit
 		title: 'Source';
 		priority: 10;
-		stencil: [ | pipeline |
-			pipeline := self pipeline.
-			pipeline astView: self ]
+		stencil: [ self pipeline astView: self ]
 ]
 
 { #category : #accessing }
