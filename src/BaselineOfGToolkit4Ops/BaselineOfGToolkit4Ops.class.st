@@ -14,5 +14,7 @@ BaselineOfGToolkit4Ops >> baseline: spec [
 
 		spec package: 'Gt4GitLab' with: [
 			spec requires: #('YAMLParser') ].
+		spec package: 'Gt4GitHub' with: [
+			spec requires: #('YAMLParser') ].
 	]
 ]
