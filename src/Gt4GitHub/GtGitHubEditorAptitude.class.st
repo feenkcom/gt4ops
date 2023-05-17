@@ -1,9 +1,6 @@
 Class {
 	#name : #GtGitHubEditorAptitude,
 	#superclass : #BrGlamorousCodeEditorAptitude,
-	#instVars : [
-		'completionController'
-	],
 	#category : #'Gt4GitHub-Aptitudes'
 }
 
