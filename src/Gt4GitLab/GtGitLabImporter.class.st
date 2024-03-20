@@ -24,7 +24,7 @@ GtGitLabImporter >> addIncludes: obj into: files [
 	| fn |
 	obj isString
 		ifTrue: [ fn := obj asFileReference.
-			fn exists ifTrue: [ self loadFilesFrom: fn into: files ].
+			fn exists ifTrue: [ self loadFromFile: fn into: files ].
 			^ self ].
 	"obj isDictionary
 		ifTrue: [ obj do: [ :each | self addIncludes: each into: files ] ]."
@@ -33,10 +33,21 @@ GtGitLabImporter >> addIncludes: obj into: files [
 ]
 
 { #category : #importing }
-GtGitLabImporter >> importPipeline: aFileReference [
+GtGitLabImporter >> importPipelineFile: aFileReference [
 	| files |
 	pipeline := GtGitLabPipeline new.
-	files := self loadFilesFrom: aFileReference.
+	files := self loadFromFile: aFileReference.
+	self loadStagesFrom: files.
+	self loadJobsFrom: files.
+	pipeline files: files.
+	^ pipeline
+]
+
+{ #category : #importing }
+GtGitLabImporter >> importPipelineString: aString [
+	| files |
+	pipeline := GtGitLabPipeline new.
+	files := self loadFromString: aString.
 	self loadStagesFrom: files.
 	self loadJobsFrom: files.
 	pipeline files: files.
@@ -60,17 +71,33 @@ GtGitLabImporter >> jobNamed: aString [
 ]
 
 { #category : #importing }
-GtGitLabImporter >> loadFilesFrom: aFileReference [
+GtGitLabImporter >> loadFromFile: aFileReference [
 	| files |
 	files := OrderedCollection new.
-	self loadFilesFrom: aFileReference into: files.
+	self loadFromFile: aFileReference into: files.
 	^ files
 ]
 
 { #category : #importing }
-GtGitLabImporter >> loadFilesFrom: aFileReference into: files [
+GtGitLabImporter >> loadFromFile: aFileReference into: files [
 	| ast |
 	ast := YAMLParser parseFileWithErrors: aFileReference.
+	files add: ast.
+	self addIncludedFilesFrom: ast into: files
+]
+
+{ #category : #importing }
+GtGitLabImporter >> loadFromString: aString [
+	| files |
+	files := OrderedCollection new.
+	self loadFromString: aString into: files.
+	^ files
+]
+
+{ #category : #importing }
+GtGitLabImporter >> loadFromString: aString into: files [
+	| ast |
+	ast := YAMLParser parseWithErrors: aString.
 	files add: ast.
 	self addIncludedFilesFrom: ast into: files
 ]
