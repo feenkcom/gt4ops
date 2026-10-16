@@ -1,5 +1,5 @@
 {
 	"repositories" : {
-		"github://j-brant/SmaCC" : "v3.0.181"
+		"github://j-brant/SmaCC/src" : "ce13715b369a87eac6c69ae90e46623eefc776e4"
 	}
 }
