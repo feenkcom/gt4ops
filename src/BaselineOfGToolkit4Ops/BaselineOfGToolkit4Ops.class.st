@@ -10,7 +10,7 @@ BaselineOfGToolkit4Ops >> baseline: spec [
 	spec for: #'common' do: [
 		spec
 			baseline: 'YAMLParser' with: [
-				spec repository: 'github://j-brant/SmaCC:6d1d7f7a031e2d9b94d93416be9ead58b86e5f27/src' ].
+				spec repository: 'github://j-brant/SmaCC:da3f53a5ccd8cf78f213da4661f681065a88fa68/src' ].
 
 		spec package: 'Gt4GitLab' with: [
 			spec requires: #(#YAMLParser) ].
